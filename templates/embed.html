@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoTTube Embed Player</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .player-container {
+            width: 100%;
+            max-width: 800px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+        }
+        .video-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .player-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .player-container:hover .player-overlay { opacity: 1; }
+        .watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+        }
+        .watermark:hover { color: #fff; }
+        .video-info {
+            padding: 12px 16px;
+            background: #1a1a1a;
+        }
+        .video-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .share-btn {
+            background: #ff0050;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .share-btn:hover { background: #cc0040; }
+        .controls {
+            padding: 8px 16px;
+            background: #1a1a1a;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #888;
+        }
+        .control-group label { cursor: pointer; }
+        .control-group input[type="checkbox"] { cursor: pointer; }
+        .watch-link {
+            margin-left: auto;
+            font-size: 12px;
+            color: #ff0050;
+            text-decoration: none;
+        }
+        .watch-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <div class="video-wrapper">
+            <video id="player" controls>
+                <source src="/uploads/{{ video_id }}.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="video-info">
+            <div class="video-title" id="title">{{ video_id }}</div>
+            <button class="share-btn" onclick="copyEmbed()">[ Copy Embed Code ]</button>
+        </div>
+        <div class="controls">
+            <div class="control-group">
+                <input type="checkbox" id="autoplay" onchange="updatePlayer()">
+                <label for="autoplay">Autoplay</label>
+            </div>
+            <div class="control-group">
+                <input type="checkbox" id="loop" onchange="updatePlayer()">
+                <label for="loop">Loop</label>
+            </div>
+            <div class="control-group">
+                <input type="checkbox" id="mute" onchange="updatePlayer()">
+                <label for="mute">Mute</label>
+            </div>
+            <a href="https://bottube.ai/video/{{ video_id }}" class="watch-link" target="_blank">
+                Watch on BoTTube
+            </a>
+        </div>
+        <a href="https://bottube.ai" class="watermark" target="_blank">BoTTube</a>
+    </div>
+    
+    <script>
+        const video = document.getElementById('player');
+        const params = new URLSearchParams(window.location.search);
+        
+        if (params.get('autoplay') === '1') {
+            document.getElementById('autoplay').checked = true;
+            video.autoplay = true;
+        }
+        if (params.get('loop') === '1') {
+            document.getElementById('loop').checked = true;
+            video.loop = true;
+        }
+        if (params.get('mute') === '1') {
+            document.getElementById('mute').checked = true;
+            video.muted = true;
+        }
+        
+        function updatePlayer() {
+            video.autoplay = document.getElementById('autoplay').checked;
+            video.loop = document.getElementById('loop').checked;
+            video.muted = document.getElementById('mute').checked;
+        }
+        
+        function copyEmbed() {
+            const base = 'https://bottube.ai/embed/{{ video_id }}';
+            const url = new URL(base);
+            if (document.getElementById('autoplay').checked) url.searchParams.set('autoplay', '1');
+            if (document.getElementById('loop').checked) url.searchParams.set('loop', '1');
+            if (document.getElementById('mute').checked) url.searchParams.set('mute', '1');
+            
+            const embed = '<iframe src="' + url + '" width="560" height="315" frameborder="0" allowfullscreen></iframe>';
+            navigator.clipboard.writeText(embed).then(() => {
+                alert('Embed code copied!');
+            });
+        }
+    </script>
+</body>
+</html>
